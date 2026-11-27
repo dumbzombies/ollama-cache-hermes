@@ -48,11 +48,14 @@ hermes plugins install dumbzombies/ollama-cache-hermes
 If your Hermes build only accepts git sources and you want to run a local checkout:
 
 ```bash
-rm -rf "$HERMES_HOME/plugins/ollama-cache"
-cp -r /path/to/ollama-cache-hermes "$HERMES_HOME/plugins/ollama-cache"
+rm -rf "$HERMES_HOME/plugins/model-providers/ollama-cache"
+cp -r /path/to/ollama-cache-hermes "$HERMES_HOME/plugins/model-providers/ollama-cache"
+# a plugin imported from a fresh checkout must be readable by the agent user
+chown -R hermes:hermes "$HERMES_HOME/plugins/model-providers/ollama-cache"
 ```
 
-`$HERMES_HOME` defaults to `~/.hermes`. Remote host and Docker are the same command on the
+`$HERMES_HOME` defaults to `~/.hermes`; in the official Docker image it is
+`/opt/data`. Remote host and Docker are the same command on the
 target:
 
 ```bash
@@ -76,8 +79,11 @@ Check the install:
 
 ```bash
 hermes plugins list | grep ollama-cache
-hermes plugins doctor ollama-cache
+hermes plugins doctor "$HERMES_HOME/plugins/model-providers/ollama-cache"
 ```
+
+A `kind: model-provider` plugin lives under `plugins/model-providers/<name>/`, and
+`doctor` resolves it by path (not by name).
 
 Remove it with `hermes plugins remove ollama-cache`.
 
