@@ -323,6 +323,37 @@ TOKEN_RE = re.compile(r"[a-z]+[0-9]*(?:\.[0-9]+)*|[0-9]+(?:\.[0-9]+)*[a-z]*", re
 TAG_SKIP = re.compile(r"^(latest|f16|f32|fp16|fp32|bf16)$", re.IGNORECASE)
 
 
+def tokens_label(tokens: int) -> str:
+    """`131072` -> `128k`; `262144` -> `256k`; `1048576` -> `1M`.
+
+    Decimal units are exact for published figures (128000), binary ones for real
+    windows (1048576), so decimal is tried first and binary after. Mirrors
+    mistral-vibe-hermes so both pickers read the same way.
+    """
+    for unit, size in (("M", 1000000), ("k", 1000), ("M", 1048576), ("k", 1024)):
+        if tokens >= size and tokens % size == 0:
+            return f"{tokens // size}{unit}"
+    return str(tokens)
+
+
+def model_specs(model: dict[str, Any]) -> str:
+    """Capabilities line for a picker note, from what /api/show actually reported."""
+    parts = [f"{tokens_label(int(model.get('contextWindow') or 32768))} ctx"]
+    if model.get("reasoning"):
+        parts.append("reasoning")
+    return ", ".join(parts)
+
+
+def model_note(model: dict[str, Any]) -> str:
+    """The dim text beside a picker row: `Qwen3 Coder 30B (Ollama) · 64k ctx`.
+
+    Hermes renders `id · note` and offers no other label slot, so the friendly name
+    lives here; the ollama id stays untouched.
+    """
+    return f"{model.get('name') or model['id']} · {model_specs(model)}"
+
+
+
 def display_name(model_id: str) -> str:
     """Human name in the style of the other two repos.
 
@@ -356,7 +387,7 @@ def display_name(model_id: str) -> str:
             words.append(token[:1].upper() + token[1:])
         else:
             words.append(token)
-    joined = " ".join(words).replace("GPT OSS", "GPT-OSS")
+    joined = re.sub(r"\bGPT OSS\b", "GPT-OSS", " ".join(words))
     return f"{joined}{suffix}" if joined else model_id
 
 
@@ -867,11 +898,10 @@ class OllamaCacheProfile(ProviderProfile):
 
     def discover_models(self, **kwargs: Any) -> list[dict[str, Any]] | None:
         """Picker rows: the ollama id stays the id, the note carries the name."""
-        rows = []
-        for model in CATALOG.get():
-            specs = f"{model.get('contextWindow', 32768)} ctx" + (", reasoning" if model.get("reasoning") else "")
-            rows.append({"id": model["id"], "label": model.get("name") or model["id"], "note": specs})
-        return rows
+        return [
+            {"id": model["id"], "label": model.get("name") or model["id"], "note": model_note(model)}
+            for model in CATALOG.get()
+        ]
 
     def create_client(self, **client_kwargs: Any) -> Any:
         """Point the shared OpenAI client at this process's own loopback server."""

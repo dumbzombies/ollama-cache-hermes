@@ -264,7 +264,11 @@ def main() -> int:
     # -- profile hooks --
     rows = profile.discover_models()
     check("discover_models labels", rows and rows[0]["label"] == "Qwen3 Coder 30B (Ollama)", str(rows)[:120])
-    check("discover_models note", rows and "65536" in rows[0]["note"], str(rows)[:120])
+    check(
+        "notes read the readable form, name first",
+        [row["note"] for row in rows or []] == ["Qwen3 Coder 30B (Ollama) · 64k ctx"],
+        str([row["note"] for row in rows or []]),
+    )
     usage = profile.fetch_account_usage()
     check("fetch_account_usage returns a window", usage is not None and usage.windows, str(usage))
 
