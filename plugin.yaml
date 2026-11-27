@@ -1,0 +1,9 @@
+name: ollama-cache
+version: 1.0.0
+kind: model-provider
+manifest_version: 1
+description: "Ollama prefix-cache maximizer — a prompt-stabilizing OpenAI-compatible loopback in front of the local ollama server. Runs inside Hermes; no proxy or daemon."
+author: dumbzombies
+license: MIT
+homepage: https://github.com/dumbzombies/ollama-cache-hermes
+tags: [model-provider, ollama, local, prefix-cache]
