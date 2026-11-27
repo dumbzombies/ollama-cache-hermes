@@ -91,3 +91,10 @@
   Tests claim, or License section.
 - **The container install predates these changes** — `/opt/data/plugins/.../ollama-cache`
   must be reinstalled from the repo to pick up readable notes.
+
+## 2026-11-27 (2) — sync hygiene: do not record a HEAD you are about to move
+
+- `state.md` had `HEAD <sha>`, but writing that file is a commit, so the recorded
+  sha was always one behind. Now: **"code as of `<sha>` — later commits here only
+  touch this bank"**, which stays true.
+- No source changed; `python3 test/plugin_check.py` 41/41.
