@@ -5,7 +5,7 @@ Give Hermes the same ollama prefix-cache benefit: a `kind: model-provider` plugi
 that runs an OpenAI-compatible rewriting proxy inside the Hermes process and
 points the provider's client at it.
 
-## Current (v1.0.0, HEAD `519ad66`, public `dumbzombies/ollama-cache-hermes`, branch `main`)
+## Current (v1.0.0, HEAD `3ccf840`, public `dumbzombies/ollama-cache-hermes`, branch `main`)
 
 Files: `plugin.yaml` (manifest_version 1, kind `model-provider`, MIT, tags
 `[model-provider, ollama, local, prefix-cache]`), `__init__.py` (stdlib only),
