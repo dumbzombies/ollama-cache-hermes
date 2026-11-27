@@ -5,7 +5,7 @@ Give Hermes the same ollama prefix-cache benefit: a `kind: model-provider` plugi
 that runs an OpenAI-compatible rewriting proxy inside the Hermes process and
 points the provider's client at it.
 
-## Current (v1.0.0, verified 2026-11-27)
+## Current (v1.0.0, HEAD `519ad66`, public `dumbzombies/ollama-cache-hermes`, branch `main`)
 
 Files: `plugin.yaml` (manifest_version 1, kind `model-provider`, MIT, tags
 `[model-provider, ollama, local, prefix-cache]`), `__init__.py` (stdlib only),
@@ -38,7 +38,9 @@ Files: `plugin.yaml` (manifest_version 1, kind `model-provider`, MIT, tags
   `ollama-local`, `base_url` → the bound loopback `/v1`, `env_vars =
   ("OLLAMA_API_KEY", "OLLAMA_CLOUD_KEY")`, `create_client()` returns an
   `openai.OpenAI` pointed at the proxy with `api_key="local"`,
-  `discover_models()` maps the catalog to `{id, label, note}`,
+  `discover_models()` maps the catalog to `{id, label, note}` where the note is
+  `"<name> · <ctx> ctx[, reasoning]"` with readable labels via `tokens_label()`
+  (`64k`, `128k`, `1M`) — the mistral-vibe-hermes form,
   `fetch_account_usage()` reads ollama.com when `OLLAMA_CLOUD_KEY` is set.
 - `format_usage(port)` renders the pi-style report (`server …`, `requests …`,
   token line, `account:` lines or `account: no OLLAMA_CLOUD_KEY set`).
@@ -67,4 +69,6 @@ None.
 - Set `OLLAMA_CLOUD_KEY` in the container to populate the `account:` lines.
 - No live ollama in the container: `/api/*` was verified against a Python stub.
   Point `OLLAMA_BASE_URL` at a reachable server before relying on discovery.
-- Publish when ready (nothing published).
+- Reinstall in the container from the public repo (`hermes plugins install
+  dumbzombies/ollama-cache-hermes`) so the picker-note change reaches it; the
+  installed copy at `/opt/data/plugins/model-providers/ollama-cache` predates it.

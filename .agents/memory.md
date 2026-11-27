@@ -63,3 +63,31 @@
 - **Restoring the host after testing:** `hermes config set model.provider …` /
   `model.default …` is the supported way to change the model section — editing
   `config.yaml` text directly did not take effect in this image.
+
+## 2026-11-27 — published; picker notes aligned with mistral-vibe-hermes
+
+- **Published:** `dumbzombies/ollama-cache-hermes`, public, default branch
+  `main` (renamed from `master` before the first push; the README's
+  `hermes plugins install dumbzombies/ollama-cache-hermes` and the `ssh`/`docker`
+  variants all rely on that default).
+- **Picker note was the visible divergence from the sibling trio.** It read
+  `65536 ctx` (raw count, no name) while `mistral-vibe-hermes` renders
+  `GLM 5.3 Flash (Vibe) · 1M ctx, 128k out, reasoning, vision`. Now:
+  `tokens_label()` (decimal units first, then binary — the exact heuristic the
+  vibe sibling uses), `model_specs()`, and
+  `model_note() -> "<name> · <ctx> ctx[, reasoning]"`. The test asserts the
+  literal string, not a substring, so a regression to raw counts fails.
+- **Copy the sibling's label logic rather than re-deriving it.** The
+  decimal-before-binary order matters: `131072` is `128k` via 1024 and `1048576`
+  is `1M` via 1048576, so trying decimal first is what makes both read
+  naturally. Getting this "simpler" (one division) yields `131.1k`.
+- **`GPT OSS` normalization now uses a word boundary** (`re.sub(r"\bGPT OSS\b",
+  …)`) to match the TS ports. The previous plain `str.replace` would also have
+  hit `GPT OSSX`; no real tag does, but the three ports should not disagree on
+  how a name is rendered.
+- **README now matches the family skeleton** (Install / First run / Models /
+  What it does / Endpoints / Configuration / Troubleshooting / Tests / Limits /
+  License). It previously opened with "What it does" and had no Troubleshooting,
+  Tests claim, or License section.
+- **The container install predates these changes** — `/opt/data/plugins/.../ollama-cache`
+  must be reinstalled from the repo to pick up readable notes.
